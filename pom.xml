@@ -99,13 +99,13 @@
 	</dependencies>
 	
 	<distributionManagement>
-	    <!-- <repository>
-	      <id>nexus</id>
+	    <repository>
+	      <id>nexus-releases</id>
 	      <name>Mithun Technologies Releases Nexus Repository</name>
-	      <url>http://13.235.8.113:8081/repository/flipkart-release/</url>
-	    </repository> -->
+	      <url>http://192.168.1.196:8084/repository/maven-releases/</url>
+	    </repository>
 	    <snapshotRepository>
-		  <id>maven-snapshots</id>
+		  <id>nexus-snapshots</id>
             <url>http://192.168.1.196:8084/repository/maven-snapshots/</url>
 	    </snapshotRepository>
 	</distributionManagement> 
