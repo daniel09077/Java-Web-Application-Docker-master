@@ -6,9 +6,9 @@ pipeline{
     }
     //tell jenkins which directory holds the java application 
     environment{
-        mvnPRJDIR = 'Java-Web-Application-Docker-master'
+        // mvnPRJDIR = 'Java-Web-Application-Docker-master'
         dockHubUname = 'kingtempest'
-        dockerimagedir = 'Java-Web-Application-Docker-master'
+        // dockerimagedir = 'Java-Web-Application-Docker-master'
         localdockerimagename = 'app'
         dockerimagetag = '1.1'
         // localdockerreponame = 
@@ -27,17 +27,18 @@ pipeline{
 
         stage('Validate and Test with Maven'){
             steps{
-                dir(env.mvnPRJDIR){
+                //dir(env.mvnPRJDIR){
+                    // sh 'ls -la'
                     sh 'mvn validate'
                      sh 'mvn test'
-                }
+               // }
             }
 
         }
         
         stage('SAST with Sonarqube'){
             steps{
-                dir(env.mvnPRJDIR){
+              //  dir(env.mvnPRJDIR){
                     withSonarQubeEnv('sonarqube token'){
 
                         sh ''' mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -47,7 +48,7 @@ pipeline{
                         '''
                     }
         
-                }
+              //  }
             }
         }
         stage('Deploy to nexus'){
@@ -55,7 +56,7 @@ pipeline{
                configFileProvider([configFile(fileId: 'maven-settings-file',
                variable: 'MAVEN_SETTINGS_FILE')])
                {
-                    dir(env.mvnPRJDIR){
+                   // dir(env.mvnPRJDIR){
                         withCredentials([usernamePassword(credentialsId: 'nexus-cred', 
                                     usernameVariable: 'NEXUS_USER', 
                                     passwordVariable: 'NEXUS_PASS')])
@@ -63,14 +64,14 @@ pipeline{
                                         sh 'mvn deploy -s $MAVEN_SETTINGS_FILE'
                                         
                                     } 
-                    }
+                //    }
                }
                
             }
         }
         stage('Download from Nexus and Build Docker Image'){
             steps{
-                 dir(env.dockerimagedir){
+                // dir(env.dockerimagedir){
             // 1. Download the artifact safely using Jenkins credentials
               withCredentials([usernamePassword(credentialsId: 'nexus-cred', 
                                     usernameVariable: 'NEXUS_USER', 
@@ -87,7 +88,7 @@ pipeline{
                      docker build -t $localdockerimagename:${dockerimagetag} .  #Replace with your Docker Hub username, image name, and tag
                '''
                 }
-            }
+          //  }
             }
         }
 
