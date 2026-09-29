@@ -6,9 +6,9 @@ pipeline{
     }
     //tell jenkins which directory holds the java application 
     environment{
-        mvnPRJDIR = 'java-with-maven/java'
+        mvnPRJDIR = 'src/main/java'
         dockHubUname = 'kingtempest'
-        dockerimagedir = 'java-with-maven/Docker/newapp'
+        dockerimagedir = ''
         localdockerimagename = 'app'
         dockerimagetag = '1.1'
         // localdockerreponame = 
