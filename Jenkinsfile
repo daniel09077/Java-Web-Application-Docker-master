@@ -1,40 +1,121 @@
-node{
-     
-    stage('SCM Checkout'){
-        git url: 'https://github.com/MithunTechnologiesDevOps/java-web-app-docker.git',branch: 'master'
+pipeline{
+   agent { label 'maven-agent' }
+    
+   tools {
+    dockerTool 'Docker' // Match the build tool name in Jenkins configuration
     }
+    //tell jenkins which directory holds the java application 
+    environment{
+        mvnPRJDIR = 'java-with-maven/java'
+        dockHubUname = 'kingtempest'
+        dockerimagedir = 'java-with-maven/Docker/newapp'
+        localdockerimagename = 'app'
+        dockerimagetag = '1.1'
+        // localdockerreponame = 
+        DOCKER_API_VERSION = '1.40'
     
-    stage(" Maven Clean Package"){
-      def mavenHome =  tool name: "Maven-3.5.6", type: "maven"
-      def mavenCMD = "${mavenHome}/bin/mvn"
-      sh "${mavenCMD} clean package"
-      
-    } 
-    
-    
-    stage('Build Docker Image'){
-        sh 'docker build -t dockerhandson/java-web-app .'
     }
-    
-    stage('Push Docker Image'){
-        withCredentials([string(credentialsId: 'Docker_Hub_Pwd', variable: 'Docker_Hub_Pwd')]) {
-          sh "docker login -u dockerhandson -p ${Docker_Hub_Pwd}"
+    stages{
+        stage('Git checkout'){
+                steps{
+                    checkout scm
+                }
+        } 
+        // stage('Build with Maven'){
+        //     agent { label 'maven-agent' }
+        // }
+
+        stage('Validate and Test with Maven'){
+            steps{
+                dir(env.mvnPRJDIR){
+                    sh 'mvn validate'
+                     sh 'mvn test'
+                }
+            }
+
         }
-        sh 'docker push dockerhandson/java-web-app'
-     }
-     
-      stage('Run Docker Image In Dev Server'){
         
-        def dockerRun = ' docker run  -d -p 8080:8080 --name java-web-app dockerhandson/java-web-app'
-         
-         sshagent(['DOCKER_SERVER']) {
-          sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.20.72 docker stop java-web-app || true'
-          sh 'ssh  ubuntu@172.31.20.72 docker rm java-web-app || true'
-          sh 'ssh  ubuntu@172.31.20.72 docker rmi -f  $(docker images -q) || true'
-          sh "ssh  ubuntu@172.31.20.72 ${dockerRun}"
-       }
-       
-    }
-     
-     
-}
+        stage('SAST with Sonarqube'){
+            steps{
+                dir(env.mvnPRJDIR){
+                    withSonarQubeEnv('sonarqube token'){
+
+                        sh ''' mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                            -Dsonar.projectKey=maven-agent-scanner \
+                            -Dsonar.projectName='maven-agent-scanner' \
+                            -Dsonar.scanner.skipJreProvisioning=true
+                        '''
+                    }
+        
+                }
+            }
+        }
+        stage('Deploy to nexus'){
+            steps{
+               configFileProvider([configFile(fileId: 'maven-settings-file',
+               variable: 'MAVEN_SETTINGS_FILE')])
+               {
+                    dir(env.mvnPRJDIR){
+                        withCredentials([usernamePassword(credentialsId: 'nexus-cred', 
+                                    usernameVariable: 'NEXUS_USER', 
+                                    passwordVariable: 'NEXUS_PASS')])
+                                    {
+                                        sh 'mvn deploy -s $MAVEN_SETTINGS_FILE'
+                                        
+                                    } 
+                    }
+               }
+               
+            }
+        }
+        stage('Download from Nexus and Build Docker Image'){
+            steps{
+                 dir(env.dockerimagedir){
+            // 1. Download the artifact safely using Jenkins credentials
+              withCredentials([usernamePassword(credentialsId: 'nexus-cred', 
+                                    usernameVariable: 'NEXUS_USER', 
+                                    passwordVariable: 'NEXUS_PASS')]) {
+                sh '''                   
+                    GROUP_ID="com.example"
+                    ARTIFACT_ID="my-app"
+                    VERSION="1.0.0-SNAPSHOT"  # Must end in -SNAPSHOT
+                    echo "Fetching the latest build for ${ARTIFACT_ID}..."
+                    curl -L -u "$NEXUS_USER:$NEXUS_PASS" \
+                     "http://192.168.1.196:8084/service/local/artifact/maven/redirect?r=snapshots&g=${GROUP_ID}&a=${ARTIFACT_ID}&v=${VERSION}&e=jar" \
+                     -o app.jar
+
+                     docker build -t $localdockerimagename:${dockerimagetag} .  #Replace with your Docker Hub username, image name, and tag
+               '''
+                }
+            }
+            }
+        }
+
+        stage('Deploying App Image to Docker Hub'){
+            steps{
+                    withCredentials([string(credentialsId: 'jenkins-access-token', variable: 'DOCKERHUB_SECRET_TOKEN')]) {          // Log into Docker Hub using the secret token stored in Jenkins credentials
+                     
+                    sh 'docker --version'
+                     sh "docker login -u ${dockHubUname} -p ${DOCKERHUB_SECRET_TOKEN}"
+                    // sh 'docker rmi app:your_tag' //Verify the image is built and available locally
+                     sh 'docker tag $localdockerimagename:$dockerimagetag $dockHubUname/$localdockerimagename:$dockerimagetag'  // Tag the image for Docker Hub
+                     sh 'docker push $dockHubUname/$localdockerimagename:$dockerimagetag'  // Replace with your Docker Hub username, image name, and tag
+                        }
+                    }           
+        }   
+
+        stage('Clean up Docker Images'){
+            steps{
+                sh 'docker rmi $localdockerimagename:$dockerimagetag || true'  // Remove the local image, ignore errors if it doesn't exist
+                sh 'docker rmi $dockHubUname/$localdockerimagename:$dockerimagetag || true'  // Remove the Docker Hub tagged image, ignore errors if it doesn't exist
+            }
+        }  
+        // stage('Deploy to Dev server'){
+        //     steps{
+
+         }
+        }
+
+
+      
+  
