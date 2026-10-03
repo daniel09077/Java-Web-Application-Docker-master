@@ -1,0 +1,18 @@
+plugin: community.proxmox.proxmox
+url: "http://192.168.1.250:8006"
+user: "ansible-automation@pve"
+token_id: "ansible-token"      # Just the short name given when creating the token
+token_secret: "a9f85223-94f1-466f-9968-18ce98dd68f0" # The unique token GUID/secret
+
+validate_certs: false
+
+# Crucial: Pulls information about VM states and cloud-init/agent interfaces
+want_facts: true
+
+# Dynamically construct groups based on Proxmox tags
+groups:
+  dev-servers: "'test-servers' in proxmox_tags"
+
+# Map the IP address from the Proxmox Guest Agent directly into Ansible
+compose:
+  ansible_host: proxmox_agent_interfaces[1]['ip-addresses'][0] | split('/') | first

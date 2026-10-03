@@ -1,0 +1,36 @@
+---
+- name: Deploying application to target nodes
+  hosts: "{{ env }}_target_nodes"
+  become: true
+  vars:
+   dockerhubusname: "kingtempest"
+   imageVersion: "1.1"
+   imageName: "app"
+   containerName: "my_web_app"
+
+  tasks:
+    - name: Ensure Docker is installed on target nodes
+      ansible.builtin.package:
+        name: docker
+        state: present
+
+    - name: Start Docker service
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+         
+    - name: Get the Docker image from the registry
+      community.docker.docker_image_pull:
+        name: "{{ dockerhubusname}/{{ imageName }}"
+        tag: "{{ imageVersion }}"
+        source: pull 
+    
+    - name: Run the container
+      
+
+
+
+
+
+  

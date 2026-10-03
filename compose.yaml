@@ -1,0 +1,14 @@
+services:
+  web-app:
+    image: "{{ dockerhubusname }}/{{ imageName }}:{{ imageVersion }}"
+    container_name: "web-app-{{ imageVersion }}"
+    ports:
+    - "8080:8080"
+    restart: always
+#     volumes:
+#       web-app-data:
+#     - 
+
+# volumes:
+#   web-app-data:
+
