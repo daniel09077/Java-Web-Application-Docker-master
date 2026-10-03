@@ -10,7 +10,7 @@ pipeline{
         dockHubUname = 'kingtempest'
         // dockerimagedir = 'Java-Web-Application-Docker-master'
         localdockerimagename = 'app'
-        dockerimagetag = '1.1'
+        dockerimagetag = '1.0'
         // localdockerreponame = 
         DOCKER_API_VERSION = '1.40'
     
@@ -121,7 +121,8 @@ pipeline{
 
          }
         }
-
+    }
+}
 
       
   
