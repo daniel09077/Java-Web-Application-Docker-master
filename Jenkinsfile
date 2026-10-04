@@ -111,12 +111,16 @@ pipeline{
                 sh 'docker rmi $dockHubUname/$localdockerimagename:$dockerimagetag || true'  // Remove the Docker Hub tagged image, ignore errors if it doesn't exist
             }
         }  
-        // stage('Deploy to Dev server'){
-        //     steps{
-
+        stage('Deploy to Dev server'){
+            steps{
+                    sh '''
+                        ansible-playbook -i proxmox.yaml deploy.yml --extra-vars "dockerhubusname=${dockHubUname} imageName=${localdockerimagename} imageVersion=${dockerimagetag}"
+                    '''
          }
         }
-
+    
+}
+}
 
       
   
