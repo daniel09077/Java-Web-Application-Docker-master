@@ -112,8 +112,10 @@ pipeline{
             }
         }  
         stage('Deploy to Dev server'){
+            label {'ansible-agent'}
             steps{
                     sh '''
+                        sudo apt-get install  && sudo apt-get upgrade ansible -y
                         ansible-playbook -i proxmox.yaml deploy.yml --extra-vars "dockerhubusname=${dockHubUname} imageName=${localdockerimagename} imageVersion=${dockerimagetag}"
                     '''
          }
