@@ -112,7 +112,6 @@ pipeline{
             }
         }  
         stage('Deploy to Dev server'){
-            label {'ansible-agent'}
             steps{
                     sh '''
                         sudo apt-get install  && sudo apt-get upgrade ansible -y
