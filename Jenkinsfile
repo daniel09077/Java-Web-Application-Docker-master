@@ -44,7 +44,7 @@ pipeline{
                         sh ''' 
                         env | grep -i sonar
                         mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-                            -Dsonar.projectKey=maven-agent-scan \
+                            -Dsonar.projectKey=maven-agent-scanner \
                             -Dsonar.projectName='maven-agent-scanner' \
                             -Dsonar.scanner.skipJreProvisioning=true
                         '''
