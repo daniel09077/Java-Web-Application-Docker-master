@@ -39,7 +39,7 @@ pipeline{
         stage('SAST with Sonarqube'){
             steps{
               //  dir(env.mvnPRJDIR){
-                    withSonarQubeEnv('sonarqube-token'){
+                    withSonarQubeEnv('sonarqube token'){
 
                         sh ''' mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                             -Dsonar.projectKey=maven-agent-scan \
