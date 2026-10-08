@@ -41,7 +41,9 @@ pipeline{
               //  dir(env.mvnPRJDIR){
                     withSonarQubeEnv('sonarqube token'){
 
-                        sh ''' mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                        sh ''' 
+                        env | grep -i sonar
+                        mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                             -Dsonar.projectKey=maven-agent-scan \
                             -Dsonar.projectName='maven-agent-scanner' \
                             -Dsonar.scanner.skipJreProvisioning=true
