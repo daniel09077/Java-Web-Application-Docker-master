@@ -114,7 +114,7 @@ pipeline{
         stage('Deploy to Dev server'){
             steps{
                     sh '''
-                         pip install --user ansible
+                        pip install --user ansible
                         ansible-playbook -i proxmox.yaml deploy.yml --extra-vars "dockerhubusname=${dockHubUname} imageName=${localdockerimagename} imageVersion=${dockerimagetag}"
                     '''
          }
