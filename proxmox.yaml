@@ -2,7 +2,7 @@ plugin: community.proxmox.proxmox
 url: "http://192.168.1.250:8006"
 user: "ansible-automation@pve"
 token_id: "ansible-token"      # Just the short name given when creating the token
-token_secret: "a9f85223-94f1-466f-9968-18ce98dd68f0" # The unique token GUID/secret
+token_secret: "a9f85223-94f1-466f-9968-18ce98dd68f0" # proxmox API token secret
 
 validate_certs: false
 

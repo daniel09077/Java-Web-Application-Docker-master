@@ -39,7 +39,7 @@ pipeline{
         stage('SAST with Sonarqube'){
             steps{
               //  dir(env.mvnPRJDIR){
-                    withSonarQubeEnv('sonarqube token'){
+                    withSonarQubeEnv('sonarqube-token'){
 
                         sh ''' 
                         env | grep -i sonar
