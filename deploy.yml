@@ -1,6 +1,6 @@
 ---
 - name: Deploying application to target nodes
-  hosts: "{{ env }}_target_nodes"
+  hosts: all
   become: true
   vars:
    dockerhubusname: "kingtempest"

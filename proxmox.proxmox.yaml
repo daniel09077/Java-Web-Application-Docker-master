@@ -11,7 +11,7 @@ want_facts: true
 
 # Dynamically construct groups based on Proxmox tags
 groups:
-  dev-servers: "'test-servers' in proxmox_tags"
+  dev-servers: "'dev-server-1' in inventory_hostname"
 
 # Map the IP address from the Proxmox Guest Agent directly into Ansible
 compose:
